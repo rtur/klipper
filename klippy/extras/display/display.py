@@ -147,15 +147,22 @@ class PrinterLCD:
             glyph_name = dg.get_name()[len(dg_prefix):]
             glyph_data = []
             for line in dg.get('data').split('\n'):
-                if line:
-                    line_val = int(line, 2)
-                    if line_val > 65535:
-                        raise config.error("Glyph line out of range for " + \
-                                 "glyph %s maximum is 65535" % (glyph_name,))
-                    glyph_data.append(line_val)
+                if not line:
+                    continue
+                try:
+                    line_val = int(line.replace('.', '0').replace('*', '1'), 2)
+                except ValueError:
+                    raise config.error("Invalid glyph line in %s"
+                                       % (glyph_name,))
+                if line_val > 65535:
+                    raise config.error("Glyph line out of range for"
+                                       " glyph %s maximum is 65535"
+                                       % (glyph_name,))
+                glyph_data.append(line_val)
             if len(glyph_data) < 16:
-                raise config.error("Not enough lines for" + \
-                        "glyph %s, 16 lines are needed" % (glyph_name,))
+                raise config.error("Not enough lines for"
+                                   " glyph %s, 16 lines are needed"
+                                   % (glyph_name,))
             icons[dg.get_name()[len(dg_prefix):]] = glyph_data
         self.lcd_chip.set_glyphs(icons)
     # Initialization
